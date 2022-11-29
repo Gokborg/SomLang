@@ -1,17 +1,19 @@
 from enum import Enum, auto
 
 class Kind(Enum):
-  
+  VAR_TYPE = auto()
   IDENTIFIER = auto()
   NUMBER = auto()
   EQUAL = auto()
+  SEMICOLON = auto()
 
   NONE = auto()
 
 class Token:
-  def __init__(self, kind: Kind, value: str, lineno: int, start: int):
+  def __init__(self, kind: Kind, value: str, line: str, lineno: int, start: int):
     self.kind = kind
     self.value = value
+    self.line = line
     self.lineno = lineno
     self.start = start
 		

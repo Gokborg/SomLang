@@ -1,1 +1,2 @@
-a 3 b
+uint a = 5;
+uint b = 3;

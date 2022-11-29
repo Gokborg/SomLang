@@ -18,6 +18,9 @@ class Buffer:
 
 def lex(filename: str) -> [Token]:
   tokens: [Token] = []
+  keywords = {
+    "uint" : Kind.VAR_TYPE
+  }
   
   with open(filename) as file:
     buf = Buffer()
@@ -26,22 +29,31 @@ def lex(filename: str) -> [Token]:
     for line in file:
       buf.set(line)
       while not buf.done:
+        #NUMBER TOKEN GENERATION
         if buf.current.isnumeric():
           start: int = buf.pos
           num: str = buf.current
           while buf.next().isnumeric():
             num += buf.current
-          tokens.append(Token(Kind.NUMBER, num, lineno, start))
+          tokens.append(Token(Kind.NUMBER, num, line, lineno, start))
 
+        #IDENTIFIER/KEYWORD TOKEN GENERATION
         elif buf.current.isalpha():
           start: int = buf.pos
           word: str = buf.current
           while buf.next().isalpha() or buf.current.isnumeric():
             word += buf.current
-          tokens.append(Token(Kind.IDENTIFIER, word, lineno, start))
+          kind: Kind = Kind.IDENTIFIER
+          if word in keywords:
+            kind = keywords[word]
+          tokens.append(Token(kind, word, line, lineno, start))
         
         elif buf.current == '=':
-          tokens.append(Token(Kind.EQUAL, buf.current, lineno, buf.pos))
+          tokens.append(Token(Kind.EQUAL, buf.current, line, lineno, buf.pos))
+          buf.next()
+        elif buf.current == ';':
+          tokens.append(Token(Kind.SEMICOLON, buf.current, line, lineno, buf.pos))
+          buf.next()
           
         else:
           buf.next()
