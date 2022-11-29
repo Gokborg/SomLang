@@ -1,4 +1,4 @@
-from token import Kind, Token, Pos
+from token import Kind, Token
 
 class Buffer:
   def set(self, line: str):
@@ -7,14 +7,14 @@ class Buffer:
     self.done: bool = False
     self.line: str = line
 
-  def next(self):
+  def next(self) -> str:
     self.pos += 1
-    
     if(self.pos < len(self.line)):
       self.current = self.line[self.pos]
     else:
       self.done = True
       self.current = '\0'
+    return self.current
 
 def lex(filename: str) -> [Token]:
   tokens: [Token] = []
@@ -28,29 +28,21 @@ def lex(filename: str) -> [Token]:
       while not buf.done:
         if buf.current.isnumeric():
           start: int = buf.pos
-          while buf.current.isnumeric():
-            buf.next()
-          num: str = buf.line[start:buf.pos]
-          tokens.append(
-            Token(Kind.NUMBER, num, 
-                  Pos(line, lineno, start, buf.pos))
-          )
+          num: str = buf.current
+          while buf.next().isnumeric():
+            num += buf.current
+          tokens.append(Token(Kind.NUMBER, num, lineno, start))
 
         elif buf.current.isalpha():
           start: int = buf.pos
-          while buf.current.isalpha() or buf.current.isnumeric():
-            buf.next()
-          word: str = buf.line[start:buf.pos]
-          tokens.append(
-            Token(Kind.IDENTIFIER, word, 
-                  Pos(line, lineno, start, buf.pos))
-          )
+          word: str = buf.current
+          while buf.next().isalpha() or buf.current.isnumeric():
+            word += buf.current
+          tokens.append(Token(Kind.IDENTIFIER, word, lineno, start))
         
         elif buf.current == '=':
-          tokens.append(
-            Token(Kind.EQUAL, buf.current,
-                 Pos(line, lineno, buf.pos, buf.pos))
-          )
+          tokens.append(Token(Kind.EQUAL, buf.current, lineno, buf.pos))
+          
         else:
           buf.next()
   

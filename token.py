@@ -1,16 +1,5 @@
 from enum import Enum, auto
 
-class Pos:
-  def __init__(self, line: str, lineno: int, start: int, end: int):
-    self.line = line
-    self.lineno = lineno
-    self.start = start
-    self.end = end
-
-  def __str__(self):
-    return "Pos(line#:" + str(self.lineno) + ", start: " + str(self.start) + ", end: " + str(self.end) + ")"
-		
-
 class Kind(Enum):
   
   IDENTIFIER = auto()
@@ -20,13 +9,14 @@ class Kind(Enum):
   NONE = auto()
 
 class Token:
-  def __init__(self, kind: Kind, value: str, pos: Pos):
+  def __init__(self, kind: Kind, value: str, lineno: int, start: int):
     self.kind = kind
     self.value = value
-    self.pos = pos
+    self.lineno = lineno
+    self.start = start
 		
   def eq(self, kind: Kind):
     return self.kind == kind
 		
   def __str__(self):
-    return "Token(kind: "+str(self.kind.name)+", value: " + self.value + ", " + self.pos.__str__() + ")"
+    return "Token(kind: "+str(self.kind.name)+", value: " + self.value + ", lineno: " + str(self.lineno) + ", start: " + str(self.start) + ")"
