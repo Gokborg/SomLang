@@ -19,7 +19,18 @@ class Buffer:
 def lex(filename: str) -> [Token]:
   tokens: [Token] = []
   keywords = {
-    "uint" : Kind.VAR_TYPE
+    "uint" : Kind.VAR_TYPE,
+    "if" : Kind.IF,
+  }
+  symbols = {
+    '=' : Kind.EQUAL,
+    ';' : Kind.SEMICOLON,
+    '{' : Kind.OPEN_BRACE,
+    '}' : Kind.CLOSE_BRACE,
+    '>' : Kind.COND_G,
+    '<' : Kind.COND_L,
+    '+' : Kind.PLUS,
+    '-' : Kind.MINUS,
   }
   
   with open(filename) as file:
@@ -47,15 +58,11 @@ def lex(filename: str) -> [Token]:
           if word in keywords:
             kind = keywords[word]
           tokens.append(Token(kind, word, line, lineno, start))
-        
-        elif buf.current == '=':
-          tokens.append(Token(Kind.EQUAL, buf.current, line, lineno, buf.pos))
-          buf.next()
-        elif buf.current == ';':
-          tokens.append(Token(Kind.SEMICOLON, buf.current, line, lineno, buf.pos))
-          buf.next()
           
         else:
+          if buf.current in symbols:
+            symbol_kind: Kind = symbols[buf.current]
+            tokens.append(Token(symbol_kind, buf.current, line, lineno, buf.pos))
           buf.next()
   
       lineno += 1

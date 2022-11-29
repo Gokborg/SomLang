@@ -2,9 +2,19 @@ from enum import Enum, auto
 
 class Kind(Enum):
   VAR_TYPE = auto()
+  
   IDENTIFIER = auto()
   NUMBER = auto()
   EQUAL = auto()
+  PLUS = auto()
+  MINUS = auto()
+
+  OPEN_BRACE = auto()
+  CLOSE_BRACE = auto()
+  IF = auto()
+  COND_G = auto()
+  COND_L = auto()
+  
   SEMICOLON = auto()
 
   NONE = auto()
