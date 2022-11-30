@@ -1,0 +1,9 @@
+uint a = 5;
+if a > 5 {
+  uint x = 2; 
+  uint y = 4;
+  uint z = 3;
+  uint b = x * y + z;
+
+}
+

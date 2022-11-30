@@ -5,6 +5,7 @@
 #AND GENERATE ASSEMBLY
 import ast
 from vargeneration import LiveRangeGeneration
+from errortools import gen_error, gen_errormsg
 
 
 class Asm:
@@ -13,28 +14,34 @@ class Asm:
     self.instrs: [str] = []
 
   def put_li(self, dest: int, value: int):
-    self.instrs.append("LI R" + str(dest) + ", " + str(value))
+    self.instrs.append("IMM R" + str(dest) + " " + str(value))
 
   def put_add(self, dest: int, srcA: int, srcB: int):
-    self.instrs.append("ADD R" + str(dest) + ", R" + str(srcA) + ", R" +
+    self.instrs.append("ADD R" + str(dest) + " R" + str(srcA) + " R" +
                        str(srcB))
 
   def put_sub(self, dest: int, srcA: int, srcB: int):
-    self.instrs.append("SUB R" + str(dest) + ", R" + str(srcA) + ", R" +
+    self.instrs.append("SUB R" + str(dest) + " R" + str(srcA) + " R" +
                        str(srcB))
 
   def put_mult(self, dest: int, srcA: int, srcB: int):
-    self.instrs.append("MULT R" + str(dest) + ", R" + str(srcA) + ", R" +
+    self.instrs.append("MLT R" + str(dest) + " R" + str(srcA) + " R" +
                        str(srcB))
   def put_div(self, dest: int, srcA: int, srcB: int):
-    self.instrs.append("DIV R" + str(dest) + ", R" + str(srcA) + ", R" +
+    self.instrs.append("DIV R" + str(dest) + " R" + str(srcA) + " R" +
                        str(srcB))
   def put_gt(self, dest: int, srcA: int, srcB: int):
-    self.instrs.append("SETG R" + str(dest) + ", R" + str(srcA) + ", R" +
+    self.instrs.append("SETG R" + str(dest) + " R" + str(srcA) + " R" +
                        str(srcB))
   def put_cmp(self, srcA: int, srcB: int):
-    self.instrs.append("CMP R" + str(srcA) + ", R" + str(srcB))
+    self.instrs.append("CMP R" + str(srcA) + " R" + str(srcB))
 
+  def put_branch(self, inst: str, label: str, left: int, right: int):
+    self.instrs.append(f"{inst} {label} R{left} R{right}")
+    
+  def put_label(self, label: str):
+    self.instrs.append(label)
+    
   def __str__(self):
     instrs_str: str = ""
     for instr in self.instrs:
@@ -47,6 +54,7 @@ class CodeGeneration:
   def __init__(self):
     self.asm: Asm = Asm()
     self.live_range: LiveRangeGeneration = LiveRangeGeneration()
+    self.label = 0
 
   def gen(self, ast_nodes) -> Asm:
     #Creates ranges of which lines the variable exists in
@@ -57,28 +65,48 @@ class CodeGeneration:
     print("")
 
     for node in ast_nodes:
-      if isinstance(node, ast.IfStatement):
-        self.gen_ifstatement(node)
-      elif isinstance(node, ast.Statement):
-        self.gen_statement(node)
+      self.gen_statement(node)
     return self.asm
 
-  def gen_ifstatement(self, ifStatement: ast.IfStatement):
-    #reg: int = self.gen_condition(ifStatement.condition)
-    #for stmt in ifStatement.block.content:
-      #print(stmt)
-    pass
+  def gen_label(self):
+    self.label += 1
+    return ".IF_" + str(self.label)
 
-  def gen_condition(self, condition: ast.Expression):
+  def gen_ifstatement(self, ifStatement: ast.IfStatement):
+    label: str = self.gen_label()
+    self.gen_condition(ifStatement.condition, label)
+    for statement in ifStatement.block.content:
+      self.gen_statement(statement)
+    self.asm.put_label(label)
+  
+  def gen_condition(self, condition: ast.Expression, end_block_label: str):
     reg1: int = self.gen_expr(condition.expr1)
     reg2: int = self.gen_expr(condition.expr2)
-    self.asm.put_cmp(reg1, reg2)
+    op = condition.op.value
+    if op == ">":
+      self.asm.put_branch("BLE", end_block_label, reg1, reg2)
+    elif op == ">=":
+      self.asm.put_branch("BRL", end_block_label, reg1, reg2)
+    elif op == "<":
+      self.asm.put_branch("BGE", end_block_label, reg1, reg2)
+    elif op == "<=":
+      self.asm.put_branch("BRG", end_block_label, reg1, reg2)
+    elif op == "==":
+      self.asm.put_branch("BNE", end_block_label, reg1, reg2)
+    elif op == "!=":
+      self.asm.put_branch("BRE", end_block_label, reg1, reg2)
+    else:
+      gen_error(condition.op, "Unknown condition operator used!")
 
   def gen_statement(self, statement: ast.Statement):
     if isinstance(statement, ast.Declaration):
       self.gen_declaration(statement)
     elif isinstance(statement, ast.Assignment):
       self.gen_assignment(statement)
+    elif isinstance(statement, ast.IfStatement):
+      self.gen_ifstatement(statement)
+    else:
+      gen_errormsg("sad")
 
   def gen_assignment(self, assignment: ast.Assignment):
     varname: str = assignment.identifier.token.value

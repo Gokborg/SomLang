@@ -3,7 +3,6 @@ from lexer import lex
 from parser import Parser
 from codegen import CodeGeneration, Asm
 
-
 def compile(filename: str):
   print("                   LEXER")
   print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
@@ -30,10 +29,10 @@ def compile(filename: str):
   print(asm)
 
 
-# compile("tests/functions.som")
-#└── ├──
-compile("tests/while.som")
 compile("tests/if.som")
+#└── ├──
+# compile("tests/while.som")
+#compile("tests/test.som")
 #for filename in os.listdir("tests"):
 #print(f"#### {filename}")
 #compile(os.path.join("tests", filename))

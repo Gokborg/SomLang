@@ -48,7 +48,7 @@ class LiveRangeGeneration:
       ranges_new[live_range] = new_set
       
     self.ranges = ranges_new
-    
+    print(self.ranges)
     l = {}
     for live_range, arr in self.ranges.items():
       for lineno in arr:
@@ -76,7 +76,6 @@ class LiveRangeGeneration:
           var_alloc[item] = reg
         else:
           alloc[lineno][item] = var_alloc[item]
-    
     self.var_allocation = alloc
 
   def gen_block_ranges(self, block: ast.Block):
