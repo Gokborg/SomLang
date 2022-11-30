@@ -19,14 +19,20 @@ class ExpressionParser:
    
   def parse(self) -> ast.Expression:
     return self.generic_parse_binop(
-      self.parse_expr_l2,
+      self.parse_expr_l3,
       [Kind.COND_E, Kind.COND_GE, Kind.COND_LE, Kind.COND_G, Kind.COND_L]
     )
-     
+  
+  def parse_expr_l3(self) -> ast.BinOp:
+    return self.generic_parse_binop(
+      self.parse_expr_l2,
+      [Kind.PLUS, Kind.MINUS]
+    )
+
   def parse_expr_l2(self) -> ast.BinOp:
     return self.generic_parse_binop(
       self.parse_expr_l1,
-      [Kind.PLUS, Kind.MINUS]
+      [Kind.MULT, Kind.DIV]
     )
 
   def parse_expr_l1(self) -> ast.Expression:
@@ -38,7 +44,7 @@ class ExpressionParser:
       return ast.Identifier(current)
     elif current.eq(Kind.OPEN_PARAN):
       expr = self.parse()
-      self.buf.expect(Kind.CLOSE_PARAN)
+      self.buf.expect_legacy(Kind.CLOSE_PARAN)
       self.buf.next()
       return expr
     else:

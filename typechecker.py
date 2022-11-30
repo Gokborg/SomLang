@@ -1,0 +1,9 @@
+class TypeChecker():
+  def __init__(self):
+    self.types: "dict[,]" = {}
+  
+  def check(self, nodes: [ast.Statement]):
+    for node in nodes:
+      ...
+    ...
+  ...

@@ -25,14 +25,21 @@ class LiveRangeGeneration:
     #returns the register of a variable at that line number
     return self.var_allocation[lineno][varname]
 
-  def gen(self, ast_nodes):
+  def gen_var(self, ast_nodes):
     for node in ast_nodes:
       if isinstance(node, ast.Declaration) or isinstance(node, ast.Assignment):
         self.gen_ranges(node)
+      elif isinstance(node, ast.Block):
+        self.gen_block_ranges(node)
+      elif isinstance(node, ast.IfStatement):
+        self.gen_expr(node.condition)
+        self.gen_block_ranges(node.block)
+
+  def gen(self, ast_nodes):
+    self.gen_var(ast_nodes)
     #new_ranges = {}
     #for live_range, arr in self.ranges.items():
       #new_ranges[live_range] = [ arr[0], arr[len(arr)-1] ]
-
     ranges_new = {}
     for live_range, arr in self.ranges.items():
       new_set = []
@@ -71,6 +78,9 @@ class LiveRangeGeneration:
           alloc[lineno][item] = var_alloc[item]
     
     self.var_allocation = alloc
+
+  def gen_block_ranges(self, block: ast.Block):
+    self.gen_var(block.content)
     
   def gen_ranges(self, assign_or_dec_node):
     self.gen_expr(assign_or_dec_node.identifier)
