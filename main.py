@@ -23,9 +23,9 @@ for node in nodes:
 print("")
 
 #DISABLING CODE GEN FOR DEBUG
-#print("                 CODEGEN")
-#print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-#codegen = CodeGeneration()
-#asm: Asm = codegen.gen(nodes)
-#print(asm)
+print("                 CODEGEN")
+print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+codegen = CodeGeneration()
+asm: Asm = codegen.gen(nodes)
+print(asm)
 

@@ -7,13 +7,17 @@ class TokenBuffer:
     self.done: bool = False
     self.content = content
     self.current: Token = self.content[self.pos]
+    #Saving last token for better errors so when the buffer
+    #is finished we can see the last token it was working on
+    self.lastToken: Token = self.content[self.pos]
   def next(self) -> Token:
     self.pos += 1
     if(self.pos < len(self.content)):
       self.current = self.content[self.pos]
+      self.lastToken = self.current
     else:
       self.done = True
-      self.current = Token(Kind.NONE, "\0", "\0", 1, 0)
+      self.current = Token(Kind.NONE, self.lastToken.value, self.lastToken.line, self.lastToken.lineno, self.lastToken.start)
     return self.current
   def expect_next(self, kind: Kind) -> Token:
     if self.next().eq(kind):

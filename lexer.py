@@ -20,6 +20,7 @@ def lex(filename: str) -> [Token]:
   tokens: [Token] = []
   keywords = {
     "uint" : Kind.VAR_TYPE,
+    "char" : Kind.VAR_TYPE,
     "if" : Kind.IF,
   }
   symbols = {
@@ -31,6 +32,13 @@ def lex(filename: str) -> [Token]:
     '<' : Kind.COND_L,
     '+' : Kind.PLUS,
     '-' : Kind.MINUS,
+    '(' : Kind.OPEN_PARAN,
+    ')' : Kind.CLOSE_PARAN,
+  }
+  double_symbols = {
+    "==" : Kind.COND_E,
+    ">=" : Kind.COND_GE,
+    "<=" : Kind.COND_LE,
   }
   
   with open(filename) as file:
@@ -61,9 +69,20 @@ def lex(filename: str) -> [Token]:
           
         else:
           if buf.current in symbols:
-            symbol_kind: Kind = symbols[buf.current]
-            tokens.append(Token(symbol_kind, buf.current, line, lineno, buf.pos))
-          buf.next()
+            current = buf.current
+            symbol_kind: Kind = symbols[current]
+
+            #Going to check for a double symbol here
+            buf.next()
+            double_symbol = buf.current + current
+            if double_symbol in double_symbols:
+              symbol_kind = double_symbols[double_symbol]
+              current = double_symbol
+              buf.next()
+            
+            tokens.append(Token(symbol_kind, current, line, lineno, buf.pos))
+          else:
+            buf.next()
   
       lineno += 1
   return tokens

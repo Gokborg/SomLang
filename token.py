@@ -14,6 +14,12 @@ class Kind(Enum):
   IF = auto()
   COND_G = auto()
   COND_L = auto()
+  COND_E = auto()
+  COND_LE = auto()
+  COND_GE = auto()
+
+  OPEN_PARAN = auto()
+  CLOSE_PARAN = auto()
   
   SEMICOLON = auto()
 

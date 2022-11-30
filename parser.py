@@ -44,6 +44,8 @@ class Parser:
     self.buf.expect_next(Kind.EQUAL)
     self.buf.next() #Pointing to expr now
     expr: Expression = self.expr_parser.parse()
+    self.buf.expect(Kind.SEMICOLON)
+    self.buf.next()
     return ast.Assignment(ast.Identifier(identifier), expr)
     
   def parse_declaration(self) -> ast.Declaration:

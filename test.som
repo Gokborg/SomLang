@@ -1,3 +1,4 @@
-if a > 3 {
-  uint a = 5;
-}
+uint a = 5;
+uint b = 1;
+uint c = 2;
+uint d = a + 3;
