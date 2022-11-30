@@ -29,7 +29,7 @@ def compile(filename: str):
   print(asm)
 
 
-compile("tests/if.som")
+compile("tests/while.som")
 #└── ├──
 # compile("tests/while.som")
 #compile("tests/test.som")

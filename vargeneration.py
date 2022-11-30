@@ -32,8 +32,21 @@ class LiveRangeGeneration:
       elif isinstance(node, ast.Block):
         self.gen_block_ranges(node)
       elif isinstance(node, ast.IfStatement):
-        self.gen_expr(node.condition)
-        self.gen_block_ranges(node.block)
+        self.gen_if(node)
+      elif isinstance(node, ast.WhileStatement):
+        self.gen_while(node)
+        
+  def gen_while(self, node: ast.WhileStatement):
+    self.gen_expr(node.condition)
+    self.gen_block_ranges(node.block)
+          
+  def gen_if(self, node: ast.IfStatement):
+    self.gen_expr(node.condition)
+    self.gen_block_ranges(node.block)
+    if isinstance(node._else, ast.Block):
+      self.gen_block_ranges(node._else)
+    elif isinstance(node._else, ast.IfStatement):
+      self.gen_if(node._else)
 
   def gen(self, ast_nodes):
     self.gen_var(ast_nodes)
@@ -48,7 +61,6 @@ class LiveRangeGeneration:
       ranges_new[live_range] = new_set
       
     self.ranges = ranges_new
-    print(self.ranges)
     l = {}
     for live_range, arr in self.ranges.items():
       for lineno in arr:

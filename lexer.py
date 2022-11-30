@@ -55,6 +55,7 @@ def lex_file(file: io.TextIOWrapper) -> [Token]:
     "==": Kind.COND_E,
     ">=": Kind.COND_GE,
     "<=": Kind.COND_LE,
+    "!=" : Kind.COND_NE,
     "//": Kind.COMMENT,
   }
 

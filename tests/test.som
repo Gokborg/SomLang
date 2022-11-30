@@ -1,9 +1,11 @@
-uint a = 5;
+uint a = 10;
 if a > 5 {
-  uint x = 2; 
-  uint y = 4;
-  uint z = 3;
-  uint b = x * y + z;
-
+  a = 1;
+}
+elif a < 5 {
+  a = 2;
+}
+else {
+  a = 3;
 }
 

@@ -26,6 +26,7 @@ class Kind(Enum):
   COND_L = auto()
   COND_E = auto()
   COND_LE = auto()
+  COND_NE = auto()
   COND_GE = auto()
   COMMA = auto()
 

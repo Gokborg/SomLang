@@ -62,6 +62,12 @@ class Parser:
   def parse_while(self) -> ast.WhileStatement:
     self.buf.expect(Kind.WHILE)
     cond_node = self.expr_parser.parse()
+    if isinstance(cond_node, ast.Number) or isinstance(cond_node, ast.Identifier):
+        binop = ast.BinOp(
+          cond_node, 
+          Token(Kind.COND_NE, "!=", cond_node.token.line, cond_node.token.lineno, cond_node.token.start), 
+          ast.Number(Token(Kind.NUMBER, "0", cond_node.token.line, cond_node.token.lineno, cond_node.token.start)))
+        cond_node = binop
     block = self.parse_block()
     return ast.WhileStatement(cond_node, block)
 
