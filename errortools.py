@@ -1,4 +1,4 @@
-from token import Token
+from tokens import Token
 import sys
 
 def gen_error(token: Token, msg: str):

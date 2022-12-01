@@ -3,7 +3,9 @@
 #SUBJECT TO HEAVY CHANGE
 #USE AS A TEMPLATE TO UNDERSTAND HOW TO GO THROUGH THE AST NODES
 #AND GENERATE ASSEMBLY
-import ast
+from typing import Optional
+
+import asts as ast
 from vargeneration import LiveRangeGeneration
 from errortools import gen_error, gen_errormsg
 
@@ -11,7 +13,7 @@ from errortools import gen_error, gen_errormsg
 class Asm:
 
   def __init__(self):
-    self.instrs: [str] = []
+    self.instrs: "list[str]" = []
 
   def put_li(self, dest: int, value: int):
     self.instrs.append("IMM R" + str(dest) + " " + str(value))
@@ -59,7 +61,7 @@ class CodeGeneration:
     self.live_range: LiveRangeGeneration = LiveRangeGeneration()
     self.label = 0
 
-  def gen(self, ast_nodes) -> Asm:
+  def gen(self, ast_nodes: "list[ast.Statement]") -> Asm:
     #Creates ranges of which lines the variable exists in
     self.live_range.gen(ast_nodes)
 
@@ -96,26 +98,28 @@ class CodeGeneration:
     self.label += 1
     return ".IF_" + str(self.label)
 
-  def gen_ifstatement(self, ifStatement: ast.IfStatement, label: str, end_label: str):
+  def gen_ifstatement(self, ifStatement: ast.IfStatement, label: Optional[str], end_label: Optional[str]):
     if label == None:
-      label: str = self.gen_label()
-    if end_label == None and ifStatement._else != None:
-      end_label: str = self.gen_label()
+      label = self.gen_label()
+    if end_label == None and ifStatement.else_ != None:
+      end_label = self.gen_label()
     self.gen_condition(ifStatement.condition, label)
     self.gen_block(ifStatement.block)
     if end_label != None:
       self.asm.put_jmp(end_label)
     self.asm.put_label(label)
       
-    if isinstance(ifStatement._else, ast.Block):
-      for statement in ifStatement._else.content:
+    if isinstance(ifStatement.else_, ast.Block):
+      for statement in ifStatement.else_.content:
         self.gen_statement(statement)
+      assert end_label is not None
       self.asm.put_label(end_label)
-    elif isinstance(ifStatement._else, ast.IfStatement):
-      self.gen_ifstatement(ifStatement._else, None, end_label)
+    elif isinstance(ifStatement.else_, ast.IfStatement):
+      self.gen_ifstatement(ifStatement.else_, None, end_label)
     
   
   def gen_condition(self, condition: ast.Expression, end_block_label: str):
+    assert isinstance(condition, ast.BinOp)
     reg1: int = self.gen_expr(condition.expr1)
     reg2: int = self.gen_expr(condition.expr2)
     op = condition.op.value
@@ -150,23 +154,22 @@ class CodeGeneration:
     varname: str = declaration.identifier.token.value
     dest_reg: int = self.live_range.get_reg(
       declaration.identifier.token.lineno, varname)
-    self.gen_expr(declaration.expr, dest_reg)
+    if declaration.expr is not None:
+      self.gen_expr(declaration.expr, dest_reg)
 
   #returns the register the expr is held in
-  def gen_expr(self, expr: ast.Expression, reg: int = None) -> int:
+  def gen_expr(self, expr: ast.Expression, reg: Optional[int] = None) -> int:
     if isinstance(expr, ast.Number):
       if reg == None:
         reg = self.live_range.get_reg(expr.token.lineno, expr.token.value)
-      self.asm.put_li(reg, expr.token.value)
+      self.asm.put_li(reg, int(expr.token.value))
       return reg
     elif isinstance(expr, ast.Identifier):
       return self.live_range.get_reg(expr.token.lineno, expr.token.value)
     elif isinstance(expr, ast.BinOp):
       reg1: int = self.gen_expr(expr.expr1)
       reg2: int = self.gen_expr(expr.expr2)
-      dest_reg: int = reg
-      if reg == None:
-        dest_reg = reg1
+      dest_reg: int = reg if reg is not None else reg1
       if expr.op.value == "+":
         self.asm.put_add(dest_reg, reg1, reg2)
       elif expr.op.value == "-":
@@ -176,3 +179,5 @@ class CodeGeneration:
       elif expr.op.value == "/":
         self.asm.put_div(dest_reg, reg1, reg2)
       return dest_reg
+    else:
+      assert False

@@ -1,14 +1,14 @@
-from token import Token, Kind
+from tokens import Token, Kind
 from errortools import gen_error, gen_errormsg
-import ast
+import asts as ast
 import tokenbuffer
 import exprparser
 
 
 class Parser:
 
-  def parse(self, tokens: [Token]) -> [ast.Statement]:
-    ast_nodes: [ast.Statement] = []
+  def parse(self, tokens: "list[Token]") -> "list[ast.Statement]":
+    ast_nodes: "list[ast.Statement]" = []
     self.buf = tokenbuffer.TokenBuffer()
     self.buf.set(tokens)
     self.expr_parser = exprparser.ExpressionParser(self.buf)
@@ -34,13 +34,13 @@ class Parser:
 
   def parse_macro_call(self):
     self.buf.expect_current(Kind.MACROCALL)
-    name = self.buf.current.value
+    name_token = self.buf.current
     self.buf.next()
     
     arguments = self.parse_arguments()
     self.buf.expect(Kind.SEMICOLON)
     
-    return ast.MacroCall(name, arguments)
+    return ast.MacroCall(ast.Identifier(name_token), arguments)
 
   def parse_if(self) -> ast.IfStatement:
     # FIXME: maybe check if it is if or elif
@@ -68,17 +68,18 @@ class Parser:
           Token(Kind.COND_NE, "!=", cond_node.token.line, cond_node.token.lineno, cond_node.token.start), 
           ast.Number(Token(Kind.NUMBER, "0", cond_node.token.line, cond_node.token.lineno, cond_node.token.start)))
         cond_node = binop
+    assert isinstance(cond_node, ast.BinOp)
     block = self.parse_block()
     return ast.WhileStatement(cond_node, block)
 
   def parse_macro(self) -> ast.MacroDeclaration:
     self.buf.expect(Kind.MACRO)
     name = ast.Identifier(self.buf.expect(Kind.IDENTIFIER))
-    args: [ast.Identifier] = self.parse_arguments()
+    args= self.parse_arguments()
     return ast.MacroDeclaration(name, args, self.parse_block())
 
-  def parse_arguments(self) -> [ast.Expression]:
-    arguments: list[ast.Expression] = []
+  def parse_arguments(self) -> "list[ast.Expression]":
+    arguments: "list[ast.Expression]" = []
     self.buf.expect(Kind.OPEN_PARAN)
     if self.buf.current.eq(Kind.CLOSE_PARAN):
       self.buf.next()

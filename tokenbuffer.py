@@ -1,10 +1,10 @@
 from errortools import gen_error, gen_errormsg
-from token import Token, Kind
+from tokens import Token, Kind
 
 
 class TokenBuffer:
 
-  def set(self, content: [Token]):
+  def set(self, content: "list[Token]"):
     self.pos: int = 0
     self.done: bool = False
     self.content = content

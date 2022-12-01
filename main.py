@@ -1,4 +1,5 @@
 import os
+import sys
 from lexer import lex
 from parser import Parser
 from codegen import CodeGeneration, Asm
@@ -9,6 +10,10 @@ def compile(filename: str):
   tokens = lex(filename)
   for token in tokens:
     print(token)
+
+  if len(tokens) == 0:
+    print("The file contains no tokens")
+    return
 
   print("")
 
@@ -29,13 +34,16 @@ def compile(filename: str):
   print(asm)
 
 
-compile("tests/while.som")
+# compile("tests/while.som")
 #└── ├──
 # compile("tests/while.som")
 #compile("tests/test.som")
-#for filename in os.listdir("tests"):
-#print(f"#### {filename}")
-#compile(os.path.join("tests", filename))
+for filename in os.listdir("tests"):
+  print(f"#### {filename}")
+  try:
+    compile(os.path.join("tests", filename))
+  except Exception as e:
+    print(e, file=sys.stderr)
 """
 multi line stuff
 """
